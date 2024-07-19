@@ -102,13 +102,22 @@ const SignupForm: React.FC = () => {
     if (el) {
       if (el.classList.contains(`err-${att}`)) {
         el.classList.remove(`err-${att}`);
+        el.classList.remove("border-red-600");
         el.parentElement?.removeChild(el.parentElement.lastChild!);
       }
     }
   };
 
   const saveToLocalStorage = () => {
-    localStorage.setItem("users", JSON.stringify(userInput));
+    const users = localStorage.getItem("users");
+    if (users) {
+      const usersArr = JSON.parse(users);
+      usersArr.push(userInput);
+      localStorage.setItem("users", JSON.stringify(usersArr));
+      return;
+    } else {
+      localStorage.setItem("users", JSON.stringify([userInput]));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -139,7 +148,7 @@ const SignupForm: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col justify-center items-end max-w-[800px] gap-6 p-10 border border-gray-300 rounded-lg"
+      className="flex flex-col justify-center max-w-[800px] gap-6 p-10 border border-gray-300 rounded-lg"
     >
       <div className="flex flex-col justify-between items-start">
         <label htmlFor="id" className="font-semibold mb-2">
@@ -167,7 +176,6 @@ const SignupForm: React.FC = () => {
         </label>
         <input
           id="email"
-          type="email"
           onChange={handleInput}
           className="border border-gray-300 rounded-lg p-2 w-96 focus:border-blue-600"
         />
