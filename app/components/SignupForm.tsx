@@ -22,86 +22,89 @@ const SignupForm: React.FC = () => {
     confirmPassword: "",
   });
   const [isActive, setIsActive] = useState(false);
-  const errorArray: IError[] = [];
 
-  const validateForm = () => {
+  const validateAndSetError = () => {
     const { id, name, email, password, confirmPassword } = userInput;
     const emailCheck = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
     const pwCheck = new RegExp("/^[0-9a-zA-Z]+$/");
+    let isOkay = true;
 
     if (id.length < 5 || id.length > 15) {
-      errorArray.push({
+      setError({
         att: "id",
         msg: "ID는 5자 이상 15자 이하로 입력해주세요.",
       });
+      isOkay = false;
     } else {
-      errorArray.splice(
-        errorArray.findIndex((e) => e.att === "id"),
-        1
-      );
+      deleteError("id");
     }
     if (name.length === 0) {
-      errorArray.push({ att: "name", msg: "이름을 입력해주세요." });
+      setError({
+        att: "name",
+        msg: "이름을 입력해주세요.",
+      });
+      isOkay = false;
     } else {
-      errorArray.splice(
-        errorArray.findIndex((e) => e.att === "name"),
-        1
-      );
+      deleteError("name");
     }
     if (email && emailCheck.test(email) === false) {
-      errorArray.push({
+      setError({
         att: "email",
-        msg: "이메일 형식을 확인해주세요.",
+        msg: "이메일 형식에 맞게 입력해주세요.",
       });
+      isOkay = false;
     } else {
-      errorArray.splice(
-        errorArray.findIndex((e) => e.att === "email"),
-        1
-      );
+      deleteError("email");
     }
     if (
       password.length < 8 ||
       (password.length > 20 && pwCheck.test(password) === false)
     ) {
-      errorArray.push({
+      setError({
         att: "password",
-        msg: "비밀번호는 8자 이상 20자 이하의 영문과 숫자만 입력해주세요.",
+        msg: "비밀번호는 8자 이상 20자 이하의 숫자, 영어 대소문자로 입력해주세요.",
       });
+      isOkay = false;
     } else {
-      errorArray.splice(
-        errorArray.findIndex((e) => e.att === "password"),
-        1
-      );
+      deleteError("password");
     }
+
     if (password !== confirmPassword) {
-      errorArray.push({
+      setError({
         att: "confirmPassword",
         msg: "비밀번호가 일치하지 않습니다.",
       });
+      isOkay = false;
     } else {
-      errorArray.splice(
-        errorArray.findIndex((e) => e.att === "confirmPassword"),
-        1
-      );
+      deleteError("confirmPassword");
     }
-    if (errorArray.length > 0) return false;
-    console.log(errorArray);
-    return true;
+
+    return isOkay;
   };
 
-  const setError = (errArr: Array<IError>) => {
-    console.log(errArr);
-    errArr.forEach((err) => {
-      const el = document.getElementById(err.att);
-      if (el) {
-        if (el.classList.contains("border-red-600")) return;
-        el.classList.add("border-red-600");
-        const errEl = document.createElement("div");
-        errEl.className = "text-red-600 text-sm";
-        errEl.textContent = err.msg;
-        el.parentElement?.appendChild(errEl);
+  const setError = (error: IError) => {
+    console.log("setErr", error.att);
+    const el = document.getElementById(error.att);
+    if (el) {
+      if (el.classList.contains(`err-${error.att}`)) return;
+      el.classList.add(`err-${error.att}`);
+      el.classList.add("border-red-600");
+      const errEl = document.createElement("div");
+      errEl.className = "text-red-600 text-sm";
+      errEl.textContent = error.msg;
+      el.parentElement?.appendChild(errEl);
+    }
+  };
+
+  const deleteError = (att: string) => {
+    console.log("delErr", att);
+    const el = document.getElementById(att);
+    if (el) {
+      if (el.classList.contains(`err-${att}`)) {
+        el.classList.remove(`err-${att}`);
+        el.parentElement?.removeChild(el.parentElement.lastChild!);
       }
-    });
+    }
   };
 
   const saveToLocalStorage = () => {
@@ -111,17 +114,12 @@ const SignupForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isActive) {
-      errorArray.push({ att: "submit", msg: "모든 필수항목을 입력해주세요." });
-      setError(errorArray);
       return;
     }
-
-    if (validateForm() === true) {
+    if (validateAndSetError()) {
       saveToLocalStorage();
       alert("회원가입이 완료되었습니다.");
       window.location.reload();
-    } else {
-      setError(errorArray);
     }
   };
 
@@ -197,7 +195,6 @@ const SignupForm: React.FC = () => {
         />
       </div>
       <button
-        id="submit"
         type="submit"
         className={`text-white font-bold px-5 py-3 rounded-xl ${
           isActive ? "bg-blue-600" : "bg-gray-300"
