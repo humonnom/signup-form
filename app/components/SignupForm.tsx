@@ -27,7 +27,7 @@ const SignupForm: React.FC = () => {
       max?: number;
     }
   ) => {
-    let errorMsg = value;
+    let errorMsg = "";
     let emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
     let pwdRegex = /^[A-Za-z0-9]*$/;
 
@@ -45,20 +45,31 @@ const SignupForm: React.FC = () => {
       return (errorMsg = "영문과 숫자만 입력해주세요.");
     }
 
-    return errorMsg ? errorMsg : "";
+    return errorMsg;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setErrorMessage({
-      id: transInputValueToErrorMsg("id", idRef.current?.value!),
+      id: transInputValueToErrorMsg("id", idRef.current?.value!, {
+        required: true,
+        min: 5,
+        max: 15,
+      }),
       email: transInputValueToErrorMsg("email", emailRef.current?.value!),
-      name: transInputValueToErrorMsg("name", nameRef.current?.value!),
-      pwd: transInputValueToErrorMsg("password", pwdRef.current?.value!),
+      name: transInputValueToErrorMsg("name", nameRef.current?.value!, {
+        required: true,
+      }),
+      pwd: transInputValueToErrorMsg("password", pwdRef.current?.value!, {
+        required: true,
+        min: 8,
+        max: 20,
+      }),
       pwdConfirm: transInputValueToErrorMsg(
         "confirmPassword",
-        pwdConfirmRef.current?.value!
+        pwdConfirmRef.current?.value!,
+        { required: true, min: 8 }
       ),
     });
 
@@ -74,27 +85,27 @@ const SignupForm: React.FC = () => {
       <div className="flex">
         <label htmlFor="id">ID:</label>
         <input id="id" type="text" ref={idRef} />
-        <p className="text-red-500">{errorMessage?.id}</p>
+        <p style={{ color: "red" }}>{errorMessage?.id}</p>
       </div>
       <div>
         <label htmlFor="name">Name:</label>
         <input id="name" ref={nameRef} />
-        <p className="text-red-500">{errorMessage?.name}</p>
+        <p style={{ color: "red" }}>{errorMessage?.name}</p>
       </div>
       <div>
         <label htmlFor="email">Email:</label>
         <input id="email" ref={emailRef} />
-        <p className="text-red-500">{errorMessage?.email}</p>
+        <p style={{ color: "red" }}>{errorMessage?.email}</p>
       </div>
       <div>
         <label htmlFor="password">Password:</label>
         <input id="password" type="password" ref={pwdRef} />
-        <p className="text-red-500">{errorMessage?.pwd}</p>
+        <p style={{ color: "red" }}>{errorMessage?.pwd}</p>
       </div>
       <div>
         <label htmlFor="confirmPassword">Confirm Password:</label>
         <input id="confirmPassword" type="password" ref={pwdConfirmRef} />
-        <p className="text-red-500">{errorMessage?.pwdConfirm}</p>
+        <p style={{ color: "red" }}>{errorMessage?.pwdConfirm}</p>
       </div>
       <button type="submit">Submit</button>
     </form>
