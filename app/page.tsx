@@ -1,3 +1,5 @@
+import "@/styles/global.css";
+
 import SignupForm from "./components/SignupForm";
 
 export const metadata = {
@@ -5,5 +7,5 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <SignupForm/>
+  return <SignupForm />;
 }
