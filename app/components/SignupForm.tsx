@@ -31,14 +31,11 @@ const SignupForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    confirmFormData();
-
-    const userInfos = [];
-    const localUserInfos = localStorage.getItem('users');
-    if (localUserInfos) userInfos.push(JSON.parse(localUserInfos));
-    userInfos.push(formData);
-
-    localStorage.setItem('users', JSON.stringify(userInfos));
+    if (confirmFormData()) {
+      const userInfos = JSON.parse(localStorage.getItem('users') || '[]');
+      userInfos.push(formData);
+      localStorage.setItem('users', JSON.stringify(userInfos));
+    }
   };
 
   const handleChangeInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +47,7 @@ const SignupForm: React.FC = () => {
   };
 
   const confirmFormData = () => {
-    const newErrors = INITIAL_DATA;
+    const newErrors = { ...INITIAL_DATA };
     const { id, name, email, password, confirmPassword } = formData;
     let result;
 
@@ -105,6 +102,7 @@ const SignupForm: React.FC = () => {
     }
 
     setErrorText(newErrors);
+    return Object.keys(newErrors).every((key) => newErrors[key as keyof FormType] === '');
   };
 
   return (
