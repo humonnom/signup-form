@@ -1,5 +1,5 @@
 "use client";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 
 type UseInputReturnType = [string, (e: ChangeEvent<HTMLInputElement>) => void];
 
@@ -34,9 +34,16 @@ const SignupForm: React.FC = () => {
   const [pwCheckValidateText, setPwCheckValidateText] = useState("");
   const [pwCheckValidate, setPwCheckValidate] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    //id 체크
+    validateId();
+    validateName();
+    validateEmail();
+    validatePassword();
+    validatePasswordCheck();
+  };
+
+  const validateId = () => {
     if (idValue.length < 5) {
       if (idValue.length === 0) {
         setIdValidateText("값을 입력해주세요.");
@@ -52,8 +59,9 @@ const SignupForm: React.FC = () => {
       setIdValidateText("");
       setIdValidate(true);
     }
+  };
 
-    //name 체크
+  const validateName = () => {
     if (nameValue.length === 0) {
       setNameValidateText("값을 입력해주세요.");
       setNameValidate(false);
@@ -61,8 +69,9 @@ const SignupForm: React.FC = () => {
       setNameValidateText("");
       setNameValidate(true);
     }
+  };
 
-    //email 체크
+  const validateEmail = () => {
     if (emailValue.length > 0 && !emailReg.test(emailValue)) {
       setEmailValidateText("이메일 형식에 맞게 입력해주세요.");
       setEmailValidate(false);
@@ -70,8 +79,9 @@ const SignupForm: React.FC = () => {
       setEmailValidateText("");
       setEmailValidate(true);
     }
+  };
 
-    //비밀번호 체크
+  const validatePassword = () => {
     if (pwValue.length > 0 && !pwReg.test(pwValue)) {
       if (pwValue.length < 8) {
         setPwValidateText("최소 8자 이상 입력해주세요.");
@@ -90,8 +100,9 @@ const SignupForm: React.FC = () => {
       setPwValidateText("");
       setPwValidate(true);
     }
+  };
 
-    //비밀번호 확인 체크
+  const validatePasswordCheck = () => {
     if (pwCheckValue.length > 0 && pwCheckValue !== pwValue) {
       setPwCheckValidateText("비밀번호가 일치하지 않습니다.");
       setPwCheckValidate(false);
@@ -102,8 +113,9 @@ const SignupForm: React.FC = () => {
       setPwCheckValidateText("");
       setPwCheckValidate(true);
     }
+  };
 
-    //로컬 스토리지에 저장
+  useEffect(() => {
     if (
       idValidate &&
       nameValidate &&
@@ -127,7 +139,7 @@ const SignupForm: React.FC = () => {
 
       localStorage.setItem("users", JSON.stringify(user_arr));
     }
-  };
+  }, [idValidate, nameValidate, emailValidate, pwValidate, pwCheckValidate]);
 
   return (
     <form
