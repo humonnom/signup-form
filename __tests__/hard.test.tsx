@@ -14,19 +14,18 @@ describe("SignupForm Additional Features", () => {
   beforeEach(() => {
     render(<SignupForm />);
   });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-  test.skip("prevents signup with existing email", async () => {
-    const mockLocalStorage = {
-      getItem: jest.fn().mockReturnValue(
-        JSON.stringify([
-          {
-            email: "existing@example.com",
-          },
-        ]),
-      ),
+  test("prevents signup with existing email", async () => {
+    jest.spyOn(window, "localStorage", "get").mockReturnValue({
+      ...window.localStorage,
+      getItem: jest
+        .fn()
+        .mockReturnValue(JSON.stringify([{ email: "existing@example.com" }])),
       setItem: jest.fn(),
-    };
-    Object.defineProperty(window, "localStorage", { value: mockLocalStorage });
+    });
 
     fireEvent.change(screen.getByLabelText(/id/i), {
       target: { value: "validid" },
@@ -47,21 +46,20 @@ describe("SignupForm Additional Features", () => {
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
     await waitFor(() => {
-      screen.debug(); // Print the current state of the DOM
       expect(
-        screen.getByText(/이미 존재하는 이메일입니다/i),
+        screen.getByText("이미 존재하는 이메일입니다."),
       ).toBeInTheDocument();
     });
 
-    expect(mockLocalStorage.setItem).not.toHaveBeenCalled();
+    expect(window.localStorage.setItem).not.toHaveBeenCalled();
   });
 
   test("stores hashed password in localStorage", async () => {
-    const mockLocalStorage = {
+    jest.spyOn(window, "localStorage", "get").mockReturnValue({
+      ...window.localStorage,
       getItem: jest.fn().mockReturnValue(null),
       setItem: jest.fn(),
-    };
-    Object.defineProperty(window, "localStorage", { value: mockLocalStorage });
+    });
 
     fireEvent.change(screen.getByLabelText(/id/i), {
       target: { value: "validid" },
@@ -86,7 +84,7 @@ describe("SignupForm Additional Features", () => {
         "validpass123",
         expect.any(Number),
       );
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+      expect(window.localStorage.setItem).toHaveBeenCalledWith(
         "users",
         expect.stringContaining("hashedPassword"),
       );
