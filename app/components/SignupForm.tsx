@@ -16,18 +16,13 @@ const SignupForm: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [users, setUsers] = useState<User[]>([]);
+  const getUsers = () =>
+    JSON.parse(localStorage.getItem("users") || "[]") as User[];
 
   const checkEmailExists = (email: string) => {
+    const users = getUsers();
     return users.some((user) => user.email === email);
   };
-
-  useEffect(() => {
-    const storedUsers = localStorage.getItem("users");
-    if (storedUsers) {
-      setUsers(JSON.parse(storedUsers));
-    }
-  }, []);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -41,7 +36,7 @@ const SignupForm: React.FC = () => {
     if (email) {
       if (!/\S+@\S+\.\S+/.test(email))
         newErrors.email = "이메일 형식에 맞게 입력해주세요.";
-      else if (users.some((user) => user.email === email))
+      else if (checkEmailExists(email))
         newErrors.email = "이미 존재하는 이메일입니다.";
     }
 
@@ -63,12 +58,11 @@ const SignupForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm() && !checkEmailExists(email)) {
+    if (validateForm()) {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser: User = { id, name, email, password: hashedPassword };
-      const updatedUsers = [...users, newUser];
+      const updatedUsers = getUsers().concat(newUser);
       localStorage.setItem("users", JSON.stringify(updatedUsers));
-      setUsers(updatedUsers);
       // Reset form fields
       setId("");
       setName("");
